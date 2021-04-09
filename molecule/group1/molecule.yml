@@ -1,0 +1,31 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: docker
+lint: |
+  set -e
+  yamllint .
+  ansible-lint
+  flake8
+platforms:
+  - name: instance-users-${MOLECULE_SCENARIO_NAME}
+    image: debian:stable
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    tmpfs:
+      - /tmp
+      - /run
+      - /run/lock
+    pre_build_image: true
+    command: sleep 1d
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      ansible_python_interpreter: /usr/bin/python3
+  config_options:
+    ssh_connection:
+      pipelining: true
+verifier:
+  name: testinfra
