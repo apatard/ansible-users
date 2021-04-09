@@ -3,13 +3,13 @@
   group:
     name: "{{ item.name }}"
     gid: "{{ item.gid | default(omit) }}"
-  with_items: "{{ groups_to_create }}"
+  with_items: "{{ users_groups_to_create }}"
 
 - name: Per-user group creation
   group:
     name: "{{ item.username }}"
     gid: "{{ item.gid | default(item.uid) | default(omit) }}"
-  with_items: "{{ users }}"
+  with_items: "{{ users_users }}"
   when: "'group' not in item and users_create_per_user_group"
 
 - name: User creation
@@ -27,15 +27,15 @@
     createhome: "{{ 'yes' if users_create_homedirs else 'no' }}"
     generate_ssh_key: "{{ item.generate_ssh_key | default(omit) }}"
     update_password: "{{ item.update_password | default(omit) }}"
-  with_items: "{{ users }}"
+  with_items: "{{ users_users }}"
 
 - name: SSH keys
   authorized_key:
     user: "{{ item.0.username }}"
     key: "{{ item.1 }}"
-    path: "{{ item.0.home | default('/home/' + item.0.username) }}/{{ authorized_keys_file }}"
+    path: "{{ item.0.home | default('/home/' + item.0.username) }}/{{ users_authorized_keys_file }}"
   with_subelements:
-    - "{{ users }}"
+    - "{{ users_users }}"
     - ssh_key
     - skip_missing: true
 
@@ -48,7 +48,7 @@
     mode: 0644
     create: true
   when: users_create_homedirs and item.profile is defined
-  with_items: "{{ users }}"
+  with_items: "{{ users_users }}"
 
 - name: Deleted user removal
   user:
@@ -56,11 +56,11 @@
     state: absent
     remove: "{{ item.remove | default(omit) }}"
     force: "{{ item.force | default(omit) }}"
-  with_items: "{{ users_deleted }}"
+  with_items: "{{ users_users_deleted }}"
 
 - name: Deleted per-user group removal
   group:
     name: "{{ item.username }}"
     state: absent
-  with_items: "{{ users_deleted }}"
+  with_items: "{{ users_users_deleted }}"
   when: users_create_per_user_group
