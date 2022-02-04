@@ -2,7 +2,7 @@
 dependency:
   name: galaxy
 driver:
-  name: docker
+  name: podman
 lint: |
   set -e
   yamllint .
@@ -11,12 +11,6 @@ lint: |
 platforms:
   - name: instance-users-${MOLECULE_SCENARIO_NAME}
     image: debian:stable
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    tmpfs:
-      - /tmp
-      - /run
-      - /run/lock
     pre_build_image: true
     command: sleep 1d
 provisioner:
