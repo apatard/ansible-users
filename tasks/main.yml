@@ -32,7 +32,8 @@
 - name: SSH keys
   authorized_key:
     user: "{{ item.0.username }}"
-    key: "{{ item.1 }}"
+    key: "{{ item.1.key | default(item.1) }}"
+    key_options: "{{ item.1.opt | default(omit) }}"
     path: "{{ item.0.home | default('/home/' + item.0.username) }}/{{ users_authorized_keys_file }}"
   with_subelements:
     - "{{ users_users }}"
